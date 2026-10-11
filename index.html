@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการลงทุน DCA 20 ปี</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <!-- นำเข้าไลบรารี SheetJS สำหรับอ่านไฟล์ Excel โดยตรงในเว็บ -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            navy: '#1a365d',     
+                            blue: '#0284c7',     
+                            lightblue: '#e0f2fe',
+                            teal: '#14b8a6',     
+                            green: '#10b981',    
+                            text: '#334155',
+                            muted: '#64748b',
+                            bg: '#f8fafc',
+                        }
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px -2px rgba(14, 165, 233, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f8fb;
+            background-image: 
+                radial-gradient(circle at 0% 0%, #e1eff8 0%, transparent 40%),
+                radial-gradient(circle at 100% 50%, #e1eff8 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, #e1eff8 0%, transparent 50%);
+            background-attachment: fixed;
+            min-width: 1440px; 
+            padding: 1.5rem;
+            color: #334155;
+            overflow-x: auto;
+        }
+
+        .card-panel {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.03);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .mock-logo {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 4px;
+            font-size: 11px; font-weight: bold; color: white;
+        }
+
+        .progress-bar {
+            background-color: #e2e8f0;
+            border-radius: 99px;
+            height: 6px;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        /* ซ่อนลูกศรขึ้นลงในช่อง input number เพื่อความสวยงาม */
+        .hide-arrows::-webkit-outer-spin-button,
+        .hide-arrows::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .hide-arrows {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="max-w-[1600px] mx-auto flex flex-col gap-4">
+
+        <header class="flex justify-between items-center bg-white/60 backdrop-blur-sm rounded-2xl p-4 px-6 shadow-sm border border-white">
+            <div class="flex items-center gap-4 shrink-0">
+                <div class="w-14 h-14 bg-gradient-to-tr from-blue-100 to-white rounded-2xl flex items-center justify-center shadow-inner border border-blue-50">
+                    <i class="fa-solid fa-chart-line text-3xl text-brand-blue"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-brand-navy tracking-tight leading-none mb-1">แผนการลงทุน DCA 20 ปี</h1>
+                    <p class="text-brand-blue text-sm font-medium">สร้างความมั่งคั่ง ด้วยวินัยการลงทุน แบบถัวเฉลี่ยต้นทุน</p>
+                </div>
+            </div>
+
+            <!-- ช่องสำหรับบันทึกลิงก์ข้อมูล (บันทึกลง LocalStorage อัตโนมัติ) -->
+            <div class="flex-1 max-w-lg mx-6">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-bold text-brand-navy flex items-center gap-1.5">
+                        <i class="fa-brands fa-google-drive text-brand-blue text-sm"></i> ลิงก์ Google Sheets (บันทึกอัตโนมัติ)
+                    </label>
+                    <div class="flex items-center w-full bg-white border border-slate-200 rounded-xl shadow-sm focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-brand-blue transition-all h-10 overflow-hidden">
+                        <input type="text" id="sheet-url-input" placeholder="วางลิงก์ที่นี่..." class="w-full px-4 py-2 text-xs text-brand-navy focus:outline-none bg-transparent h-full">
+                        <button onclick="saveSheetUrl()" class="px-4 py-2 h-full bg-slate-100 hover:bg-brand-blue hover:text-white text-brand-navy text-xs font-bold transition-colors border-l border-slate-200 flex items-center gap-2 whitespace-nowrap">
+                            <i id="save-icon" class="fa-solid fa-floppy-disk"></i> <span id="save-text">บันทึก</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 shrink-0">
+                <div class="flex items-center gap-4 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100">
+                    <i class="fa-regular fa-calendar-days text-3xl text-brand-blue opacity-80"></i>
+                    <div>
+                        <p class="text-[11px] text-brand-muted mb-0.5">ระยะเวลาลงทุน</p>
+                        <p class="font-bold text-brand-navy leading-none"><span class="text-xl">20 ปี</span> <span class="text-xs font-normal text-brand-muted">(240 เดือน)</span></p>
+                    </div>
+                </div>
+
+                <!-- ปุ่มใหม่: อัปโหลดไฟล์ Excel -->
+                <input type="file" id="excelInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                <button onclick="document.getElementById('excelInput').click()" class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 hover:border-green-500/30 transition-all group text-left">
+                    <i class="fa-solid fa-file-excel text-2xl text-green-600 opacity-80 group-hover:scale-110 transition-transform duration-300"></i>
+                    <div>
+                        <p class="text-[11px] text-brand-muted mb-0.5 group-hover:text-green-600 transition-colors">ดึงจากไฟล์</p>
+                        <p id="excel-status" class="font-bold text-brand-navy text-sm leading-none">อัปโหลด Excel</p>
+                    </div>
+                </button>
+
+                <!-- ปุ่มใหม่: อัปโหลดรูปภาพสแกนข้อมูล -->
+                <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                <button onclick="document.getElementById('imageInput').click()" class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 hover:border-brand-blue/30 transition-all group text-left">
+                    <i class="fa-solid fa-camera text-2xl text-brand-blue opacity-80 group-hover:scale-110 transition-transform duration-300"></i>
+                    <div>
+                        <p class="text-[11px] text-brand-muted mb-0.5 group-hover:text-brand-blue transition-colors">สแกนจากรูปภาพ</p>
+                        <p id="scan-status" class="font-bold text-brand-navy text-sm leading-none">วิเคราะห์ข้อมูล</p>
+                    </div>
+                </button>
+
+                <!-- เปลี่ยนจาก div ธรรมดาเป็นปุ่มกด (button) -->
+                <button onclick="refreshData()" class="flex items-center gap-4 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 hover:border-brand-blue/30 transition-all group text-left">
+                    <i class="fa-solid fa-rotate-right text-3xl text-brand-blue opacity-80 group-hover:rotate-180 transition-transform duration-500"></i>
+                    <div>
+                        <p class="text-[11px] text-brand-muted mb-0.5 group-hover:text-brand-blue transition-colors">คลิกเพื่ออัปเดตข้อมูล</p>
+                        <p id="data-status" class="font-bold text-brand-teal leading-none"><span class="text-lg">เตรียมพร้อม</span></p>
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-5 gap-4">
+            
+            <div class="card-panel p-4 flex flex-col justify-center relative overflow-hidden group">
+                <div class="flex items-center gap-2 mb-3 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-wallet text-sm"></i></div>
+                    <h3 class="text-xs font-medium text-brand-navy">เงินลงทุนรวม <span class="text-[10px] text-brand-muted">(อ้างอิงจากตาราง)</span></h3>
+                </div>
+                <p id="kpi-invested" class="text-2xl font-bold text-brand-navy relative z-10">฿ 0</p>
+            </div>
+
+            <div class="card-panel p-4 flex flex-col justify-center">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-brand-green"><i class="fa-solid fa-arrow-trend-up text-sm"></i></div>
+                    <h3 class="text-xs font-medium text-brand-navy">มูลค่าพอร์ตโดยประมาณ <span class="text-[10px] text-brand-muted">(ปัจจุบัน)</span></h3>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p id="kpi-current-value" class="text-2xl font-bold text-brand-navy">฿ 0</p>
+                    <span id="kpi-profit-pct" class="text-[10px] font-bold text-brand-green bg-green-50 px-1 rounded"><i class="fa-solid fa-caret-up"></i> 0%</span>
+                </div>
+                <p class="text-[10px] text-brand-muted mt-1">กำไร/ขาดทุนรวม <span id="kpi-profit-value" class="text-brand-green font-medium">+ ฿ 0</span></p>
+            </div>
+
+            <div class="card-panel p-4 flex flex-col justify-center">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500"><i class="fa-solid fa-coins text-sm"></i></div>
+                    <h3 class="text-xs font-medium text-brand-navy">เงินปันผลรวม <span class="text-[10px] text-brand-muted">(โดยประมาณ)</span></h3>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p id="kpi-dividend" class="text-2xl font-bold text-brand-navy">฿ 506,320</p>
+                    <span id="kpi-dividend-pct" class="text-[10px] font-bold text-brand-green bg-green-50 px-1 rounded"><i class="fa-solid fa-caret-up"></i> +19.5%</span>
+                </div>
+                <p class="text-[10px] text-brand-muted mt-1">จากเงินปันผลและดอกเบี้ย</p>
+            </div>
+
+            <div class="card-panel p-4 flex flex-col justify-center">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500"><i class="fa-solid fa-sack-dollar text-sm"></i></div>
+                    <h3 class="text-xs font-medium text-brand-navy">มูลค่าพอร์ตหลัง 20 ปี</h3>
+                </div>
+                <p id="kpi-future-value" class="text-2xl font-bold text-brand-navy">฿ 6,016,880</p>
+                <div class="flex items-center gap-1 mt-1 text-[10px]">
+                    <span id="kpi-future-pct" class="font-bold text-brand-green bg-green-50 px-1 rounded"><i class="fa-solid fa-caret-up"></i> +131.97%</span>
+                </div>
+            </div>
+
+            <div class="card-panel p-4 flex flex-col justify-center bg-gradient-to-br from-white to-slate-50">
+                <h3 class="text-[11px] font-medium text-brand-navy mb-3 border-b border-slate-100 pb-1">เปรียบเทียบกับฝากเงินธรรมดา</h3>
+                <div class="space-y-2.5">
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="text-brand-navy font-medium">DCA (ปัจจุบัน)</span>
+                            <span id="compare-dca-val" class="font-bold text-brand-navy">฿ 0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="progress-bar bg-slate-200"><div id="bar-dca" class="h-full bg-brand-teal w-[80%] rounded-full transition-all duration-500"></div></div>
+                            <div id="compare-dca-pct" class="bg-brand-teal text-white text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                                <span class="font-bold">+0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="text-brand-muted flex items-center gap-1">
+                                ฝากเงินธรรมดา (
+                                <input type="number" id="bank-interest-input" value="3" min="0" max="99" class="w-8 h-4 px-1 text-center border border-slate-300 rounded bg-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue text-brand-navy font-bold hide-arrows" oninput="updateBankComparison()">
+                                % ต่อปี)
+                            </span>
+                            <span id="compare-bank-val" class="font-medium text-brand-muted">฿ 2,102,340</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="progress-bar bg-slate-200"><div id="bar-bank" class="h-full bg-brand-blue w-[45%] rounded-full transition-all duration-500"></div></div>
+                            <div class="w-[100px]"></div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-12 gap-4 h-[600px]">
+            
+            <div class="col-span-3 flex flex-col gap-4">
+                
+                <div class="card-panel flex-1 p-4 flex flex-col relative">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-chart-line text-[10px]"></i></div>
+                        <h3 class="font-bold text-brand-navy text-[13px]">มูลค่าพอร์ตเติบโต 20 ปี</h3>
+                    </div>
+                    <div class="relative flex-1 w-full mt-2">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-panel h-[280px] p-4 flex flex-col">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-chart-pie text-[10px]"></i></div>
+                        <h3 class="font-bold text-brand-navy text-[13px]">สัดส่วนการลงทุน (ทั้ง 20 รายการ)</h3>
+                    </div>
+                    
+                    <div class="flex-1 relative flex flex-col items-center justify-center mt-1">
+                        <div class="w-[110px] h-[110px] relative" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                        <!-- Dynamic Labels Container -->
+                        <div id="donut-legend" class="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-4 text-[9px] font-medium text-brand-navy w-full px-2 max-h-[90px] overflow-y-auto custom-scroll pr-1">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-span-6 card-panel flex flex-col overflow-hidden">
+                <div class="p-3 px-4 border-b border-slate-100 flex items-center gap-2 bg-gradient-to-r from-blue-50/50 to-white">
+                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-list-ul text-[10px]"></i></div>
+                    <h3 class="font-bold text-brand-navy text-[13px]">รายละเอียดหุ้นและคริปโตที่ลงทุน (ดึงจาก Google Sheets)</h3>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto custom-scroll relative bg-white">
+                    <table class="w-full text-[10px] text-left border-collapse">
+                        <thead class="text-brand-navy bg-[#f8fafc] sticky top-0 z-10 shadow-sm border-b border-slate-200">
+                            <tr>
+                                <th class="py-2 px-2 font-medium text-center w-8">ลำดับ</th>
+                                <th class="py-2 px-2 font-medium">สินทรัพย์</th>
+                                <th class="py-2 px-2 font-medium">ประเภท</th>
+                                <th class="py-2 px-2 font-medium text-right">ราคาปัจจุบัน<br><span class="text-[8px] font-normal text-brand-muted">(USD/หน่วย)</span></th>
+                                <th class="py-2 px-2 font-medium text-right">จำนวน</th>
+                                <th class="py-2 px-2 font-medium text-right">เงินลงทุนรวม<br><span class="text-[8px] font-normal text-brand-muted">(บาท)</span></th>
+                                <th class="py-2 px-2 font-medium text-right">มูลค่าปัจจุบัน<br><span class="text-[8px] font-normal text-brand-muted">(บาท)</span></th>
+                                <th class="py-2 px-2 font-medium text-right">กำไร/ขาดทุน<br><span class="text-[8px] font-normal text-brand-muted">(บาท)</span></th>
+                                <th class="py-2 px-2 font-medium text-right">ผลตอบแทน<br><span class="text-[8px] font-normal text-brand-muted">(%)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="asset-table-body" class="divide-y divide-slate-100 text-brand-text">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-[#1e40af] text-white py-2 px-4 flex justify-between items-center text-[11px] mt-auto">
+                    <span class="font-bold w-[25%]">รวมทั้งหมด <span id="table-total-count" class="font-normal opacity-80 ml-2">0 สินทรัพย์</span></span>
+                    <div class="flex-1 flex justify-end gap-8 pr-2">
+                        <span id="table-total-invest" class="font-bold">฿ 0</span>
+                        <span id="table-total-value" class="font-bold">฿ 0</span>
+                        <span id="table-total-profit" class="font-bold text-[#6ee7b7]">+฿ 0</span>
+                        <span id="table-total-pct" class="font-bold text-[#6ee7b7]">+0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-3 flex flex-col gap-4">
+                
+                <div class="card-panel p-4 pb-2">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-medal text-[10px]"></i></div>
+                        <h3 class="font-bold text-brand-navy text-[12px]">Top 5 ผลตอบแทนสูงสุด</h3>
+                    </div>
+                    <ul id="top-5-list" class="space-y-3 text-[11px]">
+                        <!-- Injected by JS -->
+                    </ul>
+                </div>
+
+                <div class="card-panel p-4 pb-2">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-snowflake text-[10px]"></i></div>
+                        <h3 class="font-bold text-brand-navy text-[12px]">Top 5 ผลตอบแทนต่ำสุด</h3>
+                    </div>
+                    <ul id="bottom-5-list" class="space-y-3 text-[11px]">
+                        <!-- Injected by JS -->
+                    </ul>
+                </div>
+
+                <div class="card-panel p-4 flex-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-brand-blue"><i class="fa-solid fa-chart-column text-[10px]"></i></div>
+                        <h3 class="font-bold text-brand-navy text-[12px]">ผลการลงทุนแยกตามประเภทสินทรัพย์</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-5 gap-1 text-center text-[9px] mt-2">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-brand-blue mb-1 shadow-sm"><i class="fa-solid fa-chart-simple"></i></div>
+                            <p class="text-brand-muted leading-tight">หุ้นสหรัฐฯ</p>
+                            <p id="type-us" class="font-bold text-brand-navy">0%</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mb-1 shadow-sm"><i class="fa-solid fa-globe"></i></div>
+                            <p class="text-brand-muted leading-tight">หุ้นตปท.</p>
+                            <p id="type-global" class="font-bold text-brand-navy">0%</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-1 shadow-sm"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                            <p class="text-brand-muted leading-tight">กองทุน/ETF</p>
+                            <p id="type-etf" class="font-bold text-brand-navy">0%</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-1 shadow-sm"><i class="fa-solid fa-coins"></i></div>
+                            <p class="text-brand-muted leading-tight">ทองคำ</p>
+                            <p id="type-gold" class="font-bold text-brand-navy">0%</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mb-1 shadow-sm"><i class="fa-brands fa-bitcoin"></i></div>
+                            <p class="text-brand-muted leading-tight">คริปโต</p>
+                            <p id="type-crypto" class="font-bold text-brand-navy">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ตัวแปรถูกย้ายไปใช้จากช่อง Input บนหน้าเว็บแทนแล้ว เพื่อให้ผู้ใช้แก้ไขและบันทึกได้เอง
+        // ==========================================
+
+        // ข้อมูลตัวอย่างเริ่มต้น (Mock Data) ใช้ในกรณีที่ยังไม่มี URL
+        const fallbackCSV = `ลำดับ,สินทรัพย์,ประเภท,ราคาปัจจุบัน,จำนวน,เงินลงทุนรวม,มูลค่าปัจจุบัน
+1,AAPL,หุ้นสหรัฐฯ,229.35,350,98280,256780
+2,MSFT,หุ้นสหรัฐฯ,414.50,280,67200,198760
+3,AMZN,หุ้นสหรัฐฯ,203.75,310,67200,169240
+4,GOOGL,หุ้นสหรัฐฯ,165.40,320,67200,142560
+5,NVDA,หุ้นสหรัฐฯ,146.32,420,98280,210482
+6,META,หุ้นสหรัฐฯ,592.20,150,42200,98750
+7,TSLA,หุ้นสหรัฐฯ,247.80,200,56000,82610
+8,SPCX,หุ้นสหรัฐฯ,12.50,1200,70000,102480
+9,ASML,หุ้นยุโรป,682.10,120,56000,96720
+10,TSM,หุ้นต่างประเทศ,178.30,250,70000,89440
+11,GLD,กองทุนทองคำ,243.70,300,70000,84960
+12,VOO,ETF,543.20,250,70000,93450
+13,VTI,ETF,249.60,400,70000,104320
+14,BRK.B,หุ้นสหรัฐฯ,367.80,180,70000,78840
+15,IONQ,หุ้นสหรัฐฯ,38.40,900,70000,96210
+16,AMD,หุ้นสหรัฐฯ,162.30,600,70000,89760
+17,SOL,เหรียญคริปโต,145.20,60,70000,82760
+18,BTC,เหรียญคริปโต,68450.00,8,56000,78420
+19,ETH,เหรียญคริปโต,3240.00,25,56000,86750
+20,XRP,เหรียญคริปโต,0.62,18000,56000,78250`;
+
+        let myDonutChart = null;
+        let myLineChart = null;
+
+        // ตัวแปรเก็บข้อมูลส่วนกลางสำหรับอ้างอิงการคำนวณแบบเรียลไทม์
+        let globalTotalInvested = 0;
+        let globalTotalValue = 0;
+        let globalGrowthData = [];
+
+        // ฟังก์ชันช่วยจัด Format ตัวเลข
+        function formatNum(num) {
+            return Number(num).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+        }
+
+        // ฟังก์ชันสร้างโลโก้จำลอง
+        function getLogoHTML(symbol) {
+            const m = {
+                'AAPL': '<div class="mock-logo bg-black rounded-full"><i class="fa-brands fa-apple text-[11px]"></i></div>',
+                'MSFT': '<div class="mock-logo bg-white border border-slate-200 text-blue-500 rounded-sm"><i class="fa-brands fa-windows text-[11px]"></i></div>',
+                'AMZN': '<div class="mock-logo bg-black text-orange-400 rounded-sm">a</div>',
+                'GOOGL': '<div class="mock-logo bg-white border border-slate-200 rounded-full"><i class="fa-brands fa-google text-red-500 text-[10px]"></i></div>',
+                'NVDA': '<div class="mock-logo bg-green-600 rounded-full">N</div>',
+                'META': '<div class="mock-logo bg-blue-600 rounded-full"><i class="fa-brands fa-meta text-[11px]"></i></div>',
+                'TSLA': '<div class="mock-logo bg-red-600 text-white rounded-md">T</div>',
+                'SPCX': '<div class="mock-logo bg-[#1e293b] text-white rounded-full">X</div>',
+                'ASML': '<div class="mock-logo bg-blue-800 rounded-sm">AS</div>',
+                'TSM': '<div class="mock-logo bg-red-700 rounded-full">T</div>',
+                'GLD': '<div class="mock-logo bg-yellow-400 text-black rounded-full">G</div>',
+                'VOO': '<div class="mock-logo bg-red-600 rounded-full">V</div>',
+                'VTI': '<div class="mock-logo bg-blue-900 rounded-sm">V</div>',
+                'BRK.B': '<div class="mock-logo bg-blue-800 rounded-sm">B</div>',
+                'IONQ': '<div class="mock-logo bg-black text-orange-400 rounded-full">O</div>',
+                'AMD': '<div class="mock-logo bg-black text-green-500 rounded-sm">A</div>',
+                'SOL': '<div class="mock-logo bg-black text-[#14b8a6] rounded-full">S</div>',
+                'BTC': '<div class="mock-logo bg-orange-500 text-white rounded-full"><i class="fa-brands fa-bitcoin text-[12px]"></i></div>',
+                'ETH': '<div class="mock-logo bg-[#6366f1] text-white rounded-full"><i class="fa-brands fa-ethereum text-[12px]"></i></div>',
+                'XRP': '<div class="mock-logo bg-black text-white rounded-full">X</div>'
+            };
+            if(m[symbol]) return m[symbol];
+            return `<div class="mock-logo bg-slate-400 rounded-full">${symbol.charAt(0)}</div>`;
+        }
+
+        // ฟังก์ชันบันทึก URL ลง LocalStorage เพื่อไม่ให้ข้อมูลหายตอนปิดเบราว์เซอร์
+        function saveSheetUrl() {
+            const input = document.getElementById('sheet-url-input');
+            const url = input.value.trim();
+            localStorage.setItem('dcaDashboardSheetUrl', url);
+
+            const icon = document.getElementById('save-icon');
+            const text = document.getElementById('save-text');
+            icon.className = 'fa-solid fa-check';
+            text.innerText = 'บันทึกแล้ว';
+            text.parentElement.classList.add('bg-green-500', 'text-white');
+            text.parentElement.classList.remove('bg-slate-100', 'text-brand-navy', 'hover:bg-brand-blue');
+
+            setTimeout(() => {
+                icon.className = 'fa-solid fa-floppy-disk';
+                text.innerText = 'บันทึก';
+                text.parentElement.classList.remove('bg-green-500', 'text-white');
+                text.parentElement.classList.add('bg-slate-100', 'text-brand-navy', 'hover:bg-brand-blue');
+            }, 2000);
+        }
+
+        // แปลง CSV เป็น Object Array
+        function parseCSV(str) {
+            const rows = str.split('\n').filter(r => r.trim() !== '');
+            const data = [];
+            for(let i=1; i<rows.length; i++) {
+                const vals = rows[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                if(vals.length >= 7) {
+                    data.push({
+                        no: vals[0], symbol: vals[1], type: vals[2],
+                        price: parseFloat(vals[3]), amount: parseFloat(vals[4]),
+                        invested: parseFloat(vals[5]), current: parseFloat(vals[6])
+                    });
+                }
+            }
+            return data;
+        }
+
+        function renderDashboard(inputData) {
+            // รองรับทั้งข้อมูลแบบ Array (สินทรัพย์อย่างเดียว) และ Object (มีข้อมูลสรุป+ตารางเติบโต)
+            let data = Array.isArray(inputData) ? inputData : inputData.assets;
+            let summary = Array.isArray(inputData) ? null : inputData.summary;
+            let growth = Array.isArray(inputData) ? [] : inputData.growth;
+
+            // 1. คำนวณค่าต่างๆ (Calculate values)
+            let totalInvested = 0;
+            let totalValue = 0;
+            
+            data.forEach(d => {
+                d.profit = d.current - d.invested;
+                d.returnPct = d.invested > 0 ? (d.profit / d.invested) * 100 : 0;
+                totalInvested += d.invested;
+                totalValue += d.current;
+            });
+
+            let totalProfit = totalValue - totalInvested;
+            let totalReturnPct = (totalProfit / totalInvested) * 100;
+            const sign = totalProfit >= 0 ? '+' : '';
+
+            // บันทึกค่าส่วนกลางเพื่อใช้คำนวณใหม่ตอนเปลี่ยนดอกเบี้ย
+            globalTotalInvested = totalInvested;
+            globalTotalValue = totalValue;
+            globalGrowthData = growth;
+
+            // 2. อัปเดตการ์ด KPI ด้านบน (Update KPIs)
+            document.getElementById('kpi-invested').innerText = `฿ ${formatNum(totalInvested)}`;
+            document.getElementById('kpi-current-value').innerText = `฿ ${formatNum(totalValue)}`;
+            document.getElementById('kpi-profit-pct').innerHTML = `<i class="fa-solid fa-${totalProfit >= 0 ? 'caret-up' : 'caret-down'}"></i> ${sign}${formatNum(totalReturnPct)}%`;
+            document.getElementById('kpi-profit-pct').className = `text-[10px] font-bold px-1 rounded ${totalProfit >= 0 ? 'text-brand-green bg-green-50' : 'text-red-500 bg-red-50'}`;
+            document.getElementById('kpi-profit-value').innerText = `${sign} ฿ ${formatNum(totalProfit)}`;
+            document.getElementById('kpi-profit-value').className = `font-medium ${totalProfit >= 0 ? 'text-brand-green' : 'text-red-500'}`;
+
+            document.getElementById('compare-dca-val').innerText = `฿ ${formatNum(totalValue)}`;
+            document.getElementById('compare-dca-pct').innerHTML = `<span class="font-bold">${sign}${formatNum(totalReturnPct)}%</span> <span class="opacity-80">(฿ ${formatNum(totalProfit)})</span>`;
+
+            // 2.5 อัปเดตข้อมูลสรุปและกราฟเติบโต (ถ้ามีข้อมูลจากการอัปโหลด Excel)
+            if (summary && summary.dividend !== null) {
+                document.getElementById('kpi-dividend').innerText = `฿ ${formatNum(summary.dividend)}`;
+            }
+            if (summary && summary.futureValue !== null) {
+                document.getElementById('kpi-future-value').innerText = `฿ ${formatNum(summary.futureValue)}`;
+                
+                let finalPrincipal = growth && growth.length > 0 ? growth[growth.length - 1].principal : (7000 * 240);
+                let futurePct = finalPrincipal > 0 ? ((summary.futureValue - finalPrincipal) / finalPrincipal) * 100 : 0;
+                let signF = futurePct >= 0 ? '+' : '';
+                
+                const futurePctEl = document.getElementById('kpi-future-pct');
+                futurePctEl.innerHTML = `<i class="fa-solid fa-${futurePct >= 0 ? 'caret-up' : 'caret-down'}"></i> ${signF}${formatNum(futurePct)}%`;
+                futurePctEl.className = `font-bold px-1 rounded ${futurePct >= 0 ? 'text-brand-green bg-green-50' : 'text-red-500 bg-red-50'}`;
+            }
+
+            if (growth && growth.length > 0 && myLineChart) {
+                myLineChart.data.labels = growth.map(g => g.year);
+                myLineChart.data.datasets[0].data = growth.map(g => g.dcaValue);
+                myLineChart.data.datasets[1].data = growth.map(g => g.principal);
+                myLineChart.data.datasets[2].data = growth.map(g => g.bankValue);
+                myLineChart.update();
+            }
+
+            // 3. วาดตาราง (Render Table)
+            const tbody = document.getElementById('asset-table-body');
+            let tableHTML = '';
+            data.forEach(d => {
+                const sgn = d.profit >= 0 ? '+' : '';
+                const pClass = d.profit >= 0 ? 'text-brand-teal' : 'text-red-500';
+                tableHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-1.5 px-2 text-center text-brand-muted">${d.no}</td>
+                        <td class="py-1.5 px-2 font-medium text-brand-navy flex items-center gap-2">${getLogoHTML(d.symbol)} ${d.symbol}</td>
+                        <td class="py-1.5 px-2">${d.type}</td>
+                        <td class="py-1.5 px-2 text-right">${formatNum(d.price)}</td>
+                        <td class="py-1.5 px-2 text-right">${formatNum(d.amount)}</td>
+                        <td class="py-1.5 px-2 text-right text-brand-blue">${formatNum(d.invested)}</td>
+                        <td class="py-1.5 px-2 text-right font-medium">${formatNum(d.current)}</td>
+                        <td class="py-1.5 px-2 text-right ${pClass}">${sgn}${formatNum(d.profit)}</td>
+                        <td class="py-1.5 px-2 text-right ${pClass} font-medium">${sgn}${d.returnPct.toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = tableHTML;
+            
+            document.getElementById('table-total-count').innerText = `${data.length} สินทรัพย์`;
+            document.getElementById('table-total-invest').innerText = `฿ ${formatNum(totalInvested)}`;
+            document.getElementById('table-total-value').innerText = `฿ ${formatNum(totalValue)}`;
+            document.getElementById('table-total-profit').innerText = `${sign}฿ ${formatNum(totalProfit)}`;
+            document.getElementById('table-total-pct').innerText = `${sign}${formatNum(totalReturnPct)}%`;
+
+            // 4. จัดอันดับ Top 5 & Bottom 5 (Rankings)
+            const sorted = [...data].sort((a,b) => b.returnPct - a.returnPct);
+            const top5 = sorted.slice(0, 5);
+            const bottom5 = sorted.slice().reverse().slice(0, 5);
+
+            const renderRankList = (arr, elId, isTop) => {
+                const maxVal = Math.max(...arr.map(d => Math.abs(d.returnPct)));
+                let html = '';
+                arr.forEach((d, i) => {
+                    const width = maxVal === 0 ? 0 : (Math.abs(d.returnPct) / maxVal) * 100;
+                    const barColor = isTop ? 'bg-brand-teal' : 'bg-brand-blue';
+                    const textColor = isTop ? 'text-brand-teal' : 'text-brand-navy';
+                    const sgn = d.profit >= 0 ? '+' : '';
+                    html += `
+                        <li class="flex items-center gap-2">
+                            <span class="w-4 text-center font-bold text-brand-navy">${i+1}</span>
+                            ${getLogoHTML(d.symbol)}
+                            <span class="w-10 font-bold text-brand-navy">${d.symbol}</span>
+                            <div class="progress-bar"><div class="h-full ${barColor} rounded-r-full" style="width: ${width}%"></div></div>
+                            <span class="font-bold ${textColor} text-right w-[50px]">${sgn}${d.returnPct.toFixed(1)}%</span>
+                        </li>
+                    `;
+                });
+                document.getElementById(elId).innerHTML = html;
+            }
+            renderRankList(top5, 'top-5-list', true);
+            renderRankList(bottom5, 'bottom-5-list', false);
+
+            // 5. สรุปประเภทสินทรัพย์ (Type Summary)
+            let typesMap = { US: 0, Global: 0, ETF: 0, Gold: 0, Crypto: 0 };
+            data.forEach(d => {
+                // บังคับแปลงค่าประเภทให้เป็น String ก่อน เพื่อป้องกัน Error: d.type.includes is not a function
+                const assetType = d.type ? String(d.type) : '';
+                
+                if(assetType.includes('สหรัฐ')) typesMap.US += d.current;
+                else if(assetType.includes('ยุโรป') || assetType.includes('ต่างประเทศ')) typesMap.Global += d.current;
+                else if(assetType.includes('ทองคำ')) typesMap.Gold += d.current;
+                else if(assetType.includes('ETF')) typesMap.ETF += d.current;
+                else if(assetType.includes('คริปโต')) typesMap.Crypto += d.current;
+                else typesMap.Global += d.current; 
+            });
+
+            // คำนวณเป็นเปอร์เซ็นต์และอัปเดตตัวเลขบนหน้าเว็บ
+            const totalForPct = totalValue > 0 ? totalValue : 1; // ป้องกันการหารด้วย 0
+            document.getElementById('type-us').innerText = ((typesMap.US / totalForPct) * 100).toFixed(1) + '%';
+            document.getElementById('type-global').innerText = ((typesMap.Global / totalForPct) * 100).toFixed(1) + '%';
+            document.getElementById('type-etf').innerText = ((typesMap.ETF / totalForPct) * 100).toFixed(1) + '%';
+            document.getElementById('type-gold').innerText = ((typesMap.Gold / totalForPct) * 100).toFixed(1) + '%';
+            document.getElementById('type-crypto').innerText = ((typesMap.Crypto / totalForPct) * 100).toFixed(1) + '%';
+
+            // 6. อัปเดตกราฟโดนัท (Donut Chart) 20 รายการ & สีสะท้อนแสง
+            let assetValues = data.map(d => ({ symbol: d.symbol, value: d.current }));
+            assetValues.sort((a,b) => b.value - a.value); // เรียงจากมากไปน้อย
+            
+            let cLabels = assetValues.map(i => i.symbol);
+            let cData = assetValues.map(i => ((i.value / totalValue) * 100).toFixed(1));
+            
+            // ชุดสีสะท้อนแสง (Neon Colors) 20 สี
+            const neonColors = [
+                '#00FFFF', '#FF00FF', '#39FF14', '#FFE600', '#FF0055', 
+                '#8A2BE2', '#FF5E00', '#00FF66', '#FF00A0', '#7DF9FF', 
+                '#BFFF00', '#FF3300', '#0033FF', '#FF00CC', '#CCFF00', 
+                '#00FFCC', '#FF9900', '#9900FF', '#FF1493', '#00FA9A'
+            ];
+
+            if(myDonutChart) myDonutChart.destroy();
+            const ctxDonut = document.getElementById('allocationChart').getContext('2d');
+            myDonutChart = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: cLabels,
+                    datasets: [{ 
+                        data: cData, 
+                        backgroundColor: neonColors.slice(0, cData.length), 
+                        borderWidth: 2, 
+                        borderColor: '#ffffff', // เส้นขอบขาวให้สีนีออนเด่นขึ้น
+                        borderRadius: 2, 
+                        hoverOffset: 8 
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '65%', // ปรับความหนาของวงแหวน
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', // พื้นหลัง tooltip สีเข้ม
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255,255,255,0.2)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // สร้าง Custom Legend ให้กราฟโดนัท (แสดงทั้ง 20 แบบมี Scroll)
+        let legendHtml = '';
+        cLabels.forEach((lbl, idx) => {
+            const color = neonColors[idx % neonColors.length];
+            legendHtml += `
+                <div class="flex items-center justify-between">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full" style="background-color:${color}; box-shadow: 0 0 5px ${color};"></span> 
+                        ${lbl}
+                    </span> 
+                    <span>${cData[idx]}%</span>
+                </div>`;
+        });
+        document.getElementById('donut-legend').innerHTML = legendHtml;
+
+        // อัปเดตการเปรียบเทียบฝากเงินเพื่อให้สัมพันธ์กับเปอร์เซ็นต์ปัจจุบันเสมอ
+        updateBankComparison();
+    }
+
+    // ฟังก์ชันคำนวณและอัปเดตดอกเบี้ยแบบเรียลไทม์ (ฝากเงินธรรมดา)
+    function updateBankComparison() {
+        let rate = parseFloat(document.getElementById('bank-interest-input').value);
+        if (isNaN(rate) || rate < 0) rate = 0;
+        if (rate > 99) rate = 99; // จำกัดสูงสุดที่ 99%
+        
+        // จำลองคำนวณฝากเงินรายเดือนทบต้นดอกเบี้ย (20 ปี = 240 เดือน)
+        const pmt = globalTotalInvested / 240; 
+        let bankFinalValue = 0;
+        const r = (rate / 100) / 12; // ดอกเบี้ยต่อเดือน
+        
+        for(let i = 0; i < 240; i++) {
+            bankFinalValue += pmt;
+            bankFinalValue *= (1 + r);
+        }
+        
+        document.getElementById('compare-bank-val').innerText = `฿ ${formatNum(bankFinalValue)}`;
+        
+        // ปรับแถบ Progress Bar
+        const maxVal = Math.max(globalTotalValue, bankFinalValue);
+        const dcaPct = maxVal > 0 ? (globalTotalValue / maxVal) * 100 : 0;
+        const bankPct = maxVal > 0 ? (bankFinalValue / maxVal) * 100 : 0;
+        
+        document.getElementById('bar-dca').style.width = `${dcaPct}%`;
+        document.getElementById('bar-bank').style.width = `${bankPct}%`;
+        
+        // อัปเดตเส้นกราฟของฝากเงินธรรมดา (ถ้ามีข้อมูล)
+        if (myLineChart && globalGrowthData && globalGrowthData.length > 0) {
+            const newBankData = globalGrowthData.map((g, index) => {
+                let months = (index + 1) * 12; // ประมาณการ 1 จุด = 1 ปี (12 เดือน)
+                let val = 0;
+                for(let i=0; i<months; i++) {
+                    val += pmt;
+                    val *= (1 + r);
+                }
+                return val;
+            });
+            myLineChart.data.datasets[2].data = newBankData;
+            myLineChart.update();
+        }
+    }
+
+    // ฟังก์ชันอัปเดตข้อมูล: ดึงไฟล์ Excel จาก Google Drive โดยตรง
+    async function refreshData() {
+        const statusEl = document.getElementById('data-status');
+        
+        // อ่านค่า URL จากช่อง Input แทน
+        const currentSheetUrl = document.getElementById('sheet-url-input').value.trim();
+
+        if (!currentSheetUrl || currentSheetUrl === "") {
+            statusEl.innerHTML = '<span class="text-orange-500 text-[14px]"><i class="fa-solid fa-database"></i> ใช้ข้อมูลตั้งต้น</span>';
+            renderDashboard(parseCSV(fallbackCSV));
+            return;
+        }
+
+        statusEl.innerHTML = '<span class="text-brand-muted text-[14px]"><i class="fa-solid fa-spinner fa-spin"></i> กำลังดึงข้อมูล...</span>';
+        
+        try {
+            // 1. ดึง ID ไฟล์จากลิงก์ที่คุณให้มา
+            const match = currentSheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            const fileId = match ? match[1] : null;
+
+            if (!fileId) throw new Error("ลิงก์ไม่ถูกต้อง ไม่พบรหัสไฟล์");
+
+            // 2. สร้างลิงก์สำหรับดาวน์โหลดไฟล์ โดยรองรับทั้งลิงก์แบบ Sheets และ Drive ตรง
+            const exportUrl = `https://docs.google.com/spreadsheets/d/${fileId}/export?format=xlsx`;
+            const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+            // 3. ใช้ Proxy หลายตัวเพื่อแก้ปัญหาดึงไม่ได้ (Fallback mechanism)
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(exportUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(exportUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(driveUrl)}`
+            ];
+
+            let arrayBuffer = null;
+            let success = false;
+
+            // วนลูปทดลองดึงข้อมูลจาก Proxy ทีละตัว ถ้าตัวไหนพังให้เปลี่ยนไปตัวถัดไป
+            for (let proxy of proxies) {
+                try {
+                    const response = await fetch(proxy);
+                    if (response.ok) {
+                        arrayBuffer = await response.arrayBuffer();
+                        // ตรวจสอบขนาดไฟล์ ถ้าเล็กเกินไปแปลว่าอาจจะดึงติดหน้า Error ขอให้เข้าระบบของ Google
+                        if (arrayBuffer.byteLength > 2000) {
+                            success = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Proxy failed, trying next fallback...");
+                }
+            }
+
+            if (!success) throw new Error("ดาวน์โหลดไฟล์ไม่ได้ (ติด CORS หรือยังไม่ได้เปิดสาธารณะ)");
+            
+            // 4. ใช้ SheetJS อ่านไฟล์ Excel (ตรรกะเดียวกับปุ่มอัปโหลดไฟล์)
+            const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+            
+            const extractedData = {
+                assets: [],
+                summary: { dividend: null, futureValue: null },
+                growth: []
+            };
+            
+            // 5. ค้นหาข้อมูลจากทุกหน้า (Sheets)
+            workbook.SheetNames.forEach(sheetName => {
+                const worksheet = workbook.Sheets[sheetName];
+                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || !row.length) continue;
+
+                    const col0Str = String(row[0]).trim();
+                    const col1Str = row[1] != null ? String(row[1]).trim() : '';
+
+                    // - ส่วนสินทรัพย์
+                    if (!isNaN(parseInt(col0Str)) && row.length >= 7 && col1Str !== '') {
+                        const isMonth = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.", "ธ.ค"].includes(col1Str);
+                        if (!isMonth) {
+                            extractedData.assets.push({
+                                no: row[0], 
+                                symbol: col1Str, 
+                                type: row[2] != null ? String(row[2]).trim() : '', 
+                                price: parseFloat(row[3]) || 0, 
+                                amount: parseFloat(row[4]) || 0,
+                                invested: parseFloat(row[5]) || 0, 
+                                current: parseFloat(row[6]) || 0
+                            });
+                        }
+                    }
+
+                    // - ส่วนข้อมูลสรุป
+                    if (col0Str.includes('เงินปันผลรวม')) {
+                        extractedData.summary.dividend = parseFloat(col1Str.replace(/,/g, '')) || 0;
+                    }
+                    if (col0Str.includes('มูลค่าพอร์ตหลัง 20 ปี') || col0Str.includes('มูลค่าพอร์ตในอนาคต')) {
+                        extractedData.summary.futureValue = parseFloat(col1Str.replace(/,/g, '')) || 0;
+                    }
+
+                    // - ส่วนกราฟเติบโต (ดึงเฉพาะสิ้นปี ธ.ค.)
+                    if (!isNaN(parseInt(col0Str)) && parseInt(col0Str) >= 2000 && parseInt(col0Str) <= 2100) {
+                        if (col1Str === "ธ.ค." || col1Str === "ธ.ค" || col1Str.includes("ธ.ค")) {
+                            extractedData.growth.push({
+                                year: col0Str,
+                                principal: parseFloat(String(row[2]).replace(/,/g, '')) || 0,
+                                dcaValue: parseFloat(String(row[3]).replace(/,/g, '')) || 0,
+                                bankValue: parseFloat(String(row[4]).replace(/,/g, '')) || 0
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (extractedData.assets.length > 0) {
+                renderDashboard(extractedData);
+                
+                // แสดงเวลาที่อัปเดตล่าสุด
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+                statusEl.innerHTML = '<span class="text-brand-teal text-[14px]"><i class="fa-solid fa-check-circle"></i> ซิงก์ล่าสุด ' + timeStr + '</span>';
+            } else {
+                throw new Error("ไม่พบข้อมูลสินทรัพย์ในไฟล์");
+            }
+        } catch(e) {
+            console.warn("Fetch failed.", e);
+            statusEl.innerHTML = '<span class="text-red-500 text-[11px] leading-tight"><i class="fa-solid fa-triangle-exclamation"></i> ดึงไม่ได้<br>(เปิดสิทธิ์ลิงก์เป็นสาธารณะหรือยัง?)</span>';
+        }
+    }
+
+    // ฟังก์ชันใหม่: ดึงข้อมูลจากรูปภาพด้วย AI (Gemini Vision)
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const scanStatusEl = document.getElementById('scan-status');
+            scanStatusEl.innerHTML = '<span class="text-brand-teal text-[12px]"><i class="fa-solid fa-spinner fa-spin"></i> กำลังอ่านรูป...</span>';
+
+            const reader = new FileReader();
+            reader.onloadend = async function() {
+                const base64Data = reader.result.split(',')[1];
+                const mimeType = file.type;
+
+                // สั่งให้ AI อ่านรูปและจัดฟอร์แมตให้เหมือนไฟล์ CSV เป๊ะๆ
+                const prompt = `ดึงข้อมูลจากรูปภาพตารางพอร์ตการลงทุนนี้ แล้วแปลงเป็นรูปแบบ CSV ที่ใช้ "," เป็นตัวคั่น 
+โดยต้องมีหัวคอลัมน์และลำดับข้อมูลตามนี้เป๊ะๆ (ห้ามขาดหรือเกิน):
+ลำดับ,สินทรัพย์,ประเภท,ราคาปัจจุบัน,จำนวน,เงินลงทุนรวม,มูลค่าปัจจุบัน
+
+ตัวอย่างข้อมูล:
+1,AAPL,หุ้นสหรัฐฯ,229.35,350,98280,256780
+
+เงื่อนไขสำคัญ:
+- ห้ามใส่เครื่องหมายลูกน้ำ (,) ลงไปในตัวเลขเด็ดขาด (เช่น 1,000 ให้พิมพ์ 1000)
+- คืนค่ามาเป็นข้อความ CSV ล้วนๆ ห้ามใส่ \`\`\`csv หรือ markdown ใดๆ ครอบมาทั้งสิ้น`;
+
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inlineData: {
+                                        mimeType: mimeType,
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                };
+
+                const apiKey = ""; // Canvas จะจัดการเรื่อง API Key ให้อัตโนมัติ
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
+                        let csvText = result.candidates[0].content.parts[0].text;
+                        
+                        // ตัด Markdown Formatting ทิ้งเผื่อ AI เผลอใส่มา
+                        csvText = csvText.replace(/```csv/gi, '').replace(/```/g, '').trim();
+                        
+                        const data = parseCSV(csvText);
+                        if (data.length > 0) {
+                            renderDashboard(data);
+                            scanStatusEl.innerHTML = '<span class="text-brand-green text-[13px]"><i class="fa-solid fa-check"></i> สำเร็จ!</span>';
+                            setTimeout(() => { scanStatusEl.innerText = 'วิเคราะห์ข้อมูล'; }, 4000);
+                        } else {
+                            throw new Error("แยกข้อมูลไม่สำเร็จ");
+                        }
+                    } else {
+                        throw new Error("รูปแบบผลลัพธ์ไม่ถูกต้อง");
+                    }
+                } catch (e) {
+                    console.error("AI Analysis failed.", e);
+                    scanStatusEl.innerHTML = '<span class="text-red-500 text-[11px] leading-tight">วิเคราะห์ภาพไม่สำเร็จ<br>โปรดลองใหม่</span>';
+                    setTimeout(() => { scanStatusEl.innerText = 'วิเคราะห์ข้อมูล'; }, 4000);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // ฟังก์ชันใหม่: ดึงข้อมูลจากไฟล์ Excel โดยตรง
+        async function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('excel-status');
+            statusEl.innerHTML = '<span class="text-brand-teal text-[12px]"><i class="fa-solid fa-spinner fa-spin"></i> กำลังอ่านไฟล์...</span>';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    
+                    const extractedData = {
+                        assets: [],
+                        summary: { dividend: null, futureValue: null },
+                        growth: []
+                    };
+                    
+                    // วนลูปอ่านข้อมูลจากทุก Sheet ป้องกันการสับสนระหว่าง V2 หรือ V3
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                        
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i];
+                            if (!row || !row.length) continue;
+
+                            const col0Str = String(row[0]).trim();
+                            const col1Str = row[1] != null ? String(row[1]).trim() : '';
+
+                            // ส่วนที่ 1: ดึงข้อมูลสินทรัพย์
+                            if (!isNaN(parseInt(col0Str)) && row.length >= 7 && col1Str !== '') {
+                                const isMonth = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.", "ธ.ค"].includes(col1Str);
+                                if (!isMonth) {
+                                    extractedData.assets.push({
+                                        no: row[0], 
+                                        symbol: col1Str, 
+                                        type: row[2] != null ? String(row[2]).trim() : '', 
+                                        price: parseFloat(row[3]) || 0, 
+                                        amount: parseFloat(row[4]) || 0,
+                                        invested: parseFloat(row[5]) || 0, 
+                                        current: parseFloat(row[6]) || 0
+                                    });
+                                }
+                            }
+
+                            // ส่วนที่ 2: ดึงข้อมูลสรุป
+                            if (col0Str.includes('เงินปันผลรวม')) {
+                                extractedData.summary.dividend = parseFloat(col1Str.replace(/,/g, '')) || 0;
+                            }
+                            if (col0Str.includes('มูลค่าพอร์ตหลัง 20 ปี') || col0Str.includes('มูลค่าพอร์ตในอนาคต')) {
+                                extractedData.summary.futureValue = parseFloat(col1Str.replace(/,/g, '')) || 0;
+                            }
+
+                            // ส่วนที่ 3: ดึงข้อมูลตารางเติบโต (เฉพาะเดือน ธ.ค. เพื่อสรุปรายปี)
+                            if (!isNaN(parseInt(col0Str)) && parseInt(col0Str) >= 2000 && parseInt(col0Str) <= 2100) {
+                                if (col1Str === "ธ.ค." || col1Str === "ธ.ค" || col1Str.includes("ธ.ค")) {
+                                    extractedData.growth.push({
+                                        year: col0Str,
+                                        principal: parseFloat(String(row[2]).replace(/,/g, '')) || 0,
+                                        dcaValue: parseFloat(String(row[3]).replace(/,/g, '')) || 0,
+                                        bankValue: parseFloat(String(row[4]).replace(/,/g, '')) || 0
+                                    });
+                                }
+                            }
+                        }
+                    });
+
+                    if (extractedData.assets.length > 0) {
+                        renderDashboard(extractedData);
+                        statusEl.innerHTML = '<span class="text-brand-green text-[13px]"><i class="fa-solid fa-check"></i> สำเร็จ!</span>';
+                        setTimeout(() => { statusEl.innerText = 'อัปโหลด Excel'; }, 4000);
+                    } else {
+                        throw new Error("ไม่พบข้อมูลสินทรัพย์ในไฟล์");
+                    }
+                    
+                } catch(error) {
+                    console.error("Excel processing failed.", error);
+                    statusEl.innerHTML = '<span class="text-red-500 text-[11px] leading-tight">ไฟล์ไม่ถูกต้อง<br>โปรดลองใหม่</span>';
+                    setTimeout(() => { statusEl.innerText = 'อัปโหลด Excel'; }, 4000);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            
+            // เคลียร์ค่า input เผื่อผู้ใช้ต้องการอัปโหลดไฟล์เดิมอีกครั้ง
+            event.target.value = '';
+        }
+
+        async function initApp() {
+            Chart.register(ChartDataLabels);
+            Chart.defaults.font.family = "'Kanit', sans-serif";
+            
+            // โหลดข้อมูลลิงก์ที่เคยบันทึกไว้ในเครื่อง (ถ้ามี)
+            const savedUrl = localStorage.getItem('dcaDashboardSheetUrl');
+            if (savedUrl) {
+                document.getElementById('sheet-url-input').value = savedUrl;
+            } else {
+                // ค่าเริ่มต้น หากยังไม่เคยมีการบันทึก
+                document.getElementById('sheet-url-input').value = "https://docs.google.com/spreadsheets/d/1WNep9q0lrWLrBdCipgMHiAJ0FDwKXQ34/edit?usp=sharing&ouid=102875754799565431737&rtpof=true&sd=true";
+            }
+
+            // วาดกราฟเส้นเริ่มต้น (Line Chart) เป็นข้อมูล Static ของการประเมิน 20 ปี
+            const ctxLine = document.getElementById('growthChart').getContext('2d');
+            myLineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2027', '2029', '2031', '2033', '2035', '2037', '2039', '2041', '2043', '2045'],
+                    datasets: [
+                        { label: 'DCA Portfolio', data: [100000, 300000, 650000, 1100000, 1600000, 2200000, 2900000, 3700000, 4600000, 5600000, 6016880], borderColor: '#14b8a6', borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#14b8a6' },
+                        { label: 'เงินต้นรวม', data: [100000, 270000, 550000, 850000, 1150000, 1480000, 1850000, 2250000, 2700000, 3200000, 4028560], borderColor: '#0284c7', borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#0284c7' },
+                        { label: 'ฝากเงินธรรมดา', data: [100000, 250000, 500000, 750000, 1000000, 1250000, 1500000, 1750000, 2000000, 2250000, 2102340], borderColor: '#cbd5e1', borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#cbd5e1' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    layout: {
+                        // เพิ่มพื้นที่ว่างด้านขวาและบนล่าง ป้องกันตัวหนังสือโดนตัด
+                        padding: { right: 150, top: 30, bottom: 30, left: 10 } 
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: { 
+                            display: function(context) {
+                                // แสดงเฉพาะข้อมูลจุดสุดท้ายของเส้น
+                                return context.dataIndex === context.dataset.data.length - 1;
+                            },
+                            align: function(context) {
+                                // เช็คว่าค่าปัจจุบันอยู่อันดับที่เท่าไร เพื่อกระจายทิศทางไม่ให้ทับกัน
+                                const datasets = context.chart.data.datasets;
+                                const currentVal = context.dataset.data[context.dataIndex];
+                                let rank = 0;
+                                datasets.forEach(ds => {
+                                    if (ds.data[context.dataIndex] > currentVal) rank++;
+                                });
+                                
+                                if (rank === 0) return -35; // ค่าสูงสุด (บนสุด) ให้เฉียงขึ้นขวา
+                                if (rank === 1) return 0;   // ค่ากลาง ให้ชี้ไปทางขวาตรงๆ
+                                return 35;                  // ค่าต่ำสุด (ล่างสุด) ให้เฉียงลงขวา
+                            },
+                            anchor: 'end', // ยึดที่ขอบนอกของจุด
+                            offset: function(context) {
+                                // ปรับระยะห่างให้หลบกัน
+                                const datasets = context.chart.data.datasets;
+                                const currentVal = context.dataset.data[context.dataIndex];
+                                let rank = 0;
+                                datasets.forEach(ds => {
+                                    if (ds.data[context.dataIndex] > currentVal) rank++;
+                                });
+                                
+                                if (rank === 1) return 8; // ค่ากลางให้อยู่ใกล้จุด
+                                return 18; // ค่าบนสุดและล่างสุดดันออกไปไกลกว่าเพื่อหลบเส้นกลาง
+                            },
+                            formatter: function(value, context) {
+                                return [
+                                    context.dataset.label, 
+                                    '฿ ' + Number(value).toLocaleString('en-US', {maximumFractionDigits: 0})
+                                ];
+                            },
+                            color: function(context) {
+                                return context.dataset.borderColor;
+                            },
+                            font: {
+                                family: "'Kanit', sans-serif",
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                            borderRadius: 4,
+                            padding: 3,
+                            textAlign: 'left'
+                        }
+                    },
+                    scales: {
+                        y: { ticks: { callback: v => v===0 ? '฿0' : '฿'+v.toLocaleString(), font: { size: 9 } }, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { ticks: { font: { size: 9 } }, grid: { display: false }, border: { display: false } }
+                    }
+                }
+            });
+
+            // ดึงข้อมูลครั้งแรกเมื่อโหลดหน้าเว็บ
+            await refreshData();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
